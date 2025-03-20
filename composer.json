@@ -1,0 +1,22 @@
+{
+    "name": "gii/module-opname-stock",
+    "autoload": {
+        "psr-4": {
+            "Gii\\ModuleOpnameStock\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Alghi",
+            "email": "a@a.com"
+        }
+    ],
+    "require": {
+        "zahzah/laravel-support": "1.x",
+        "zahzah/module-warehouse": "1.x",
+        "zahzah/module-transaction": "1.x",
+        "gii/module-item": "1.x"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false
+}
