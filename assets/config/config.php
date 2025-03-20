@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\User;
-use Gii\ModuleOpnameStock\{
+use Hanafalah\ModuleOpnameStock\{
     Models as ModuleOpname,
     Commands as ModuleOpnameCommand
 };
-use Zahzah\ModuleWarehouse\Models\Building\Room;
+use Hanafalah\ModuleWarehouse\Models\Building\Room;
 
 return [
     'commands' => [

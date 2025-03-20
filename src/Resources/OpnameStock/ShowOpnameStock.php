@@ -1,6 +1,6 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Resources\OpnameStock;
+namespace Hanafalah\ModuleOpnameStock\Resources\OpnameStock;
 
 class ShowOpnameStock extends ViewOpnameStock
 {
@@ -10,14 +10,14 @@ class ShowOpnameStock extends ViewOpnameStock
             'author' => $this->relationValidation('author', function () {
                 return $this->author->toViewApi();
             }),
-            'card_stocks' => $this->relationValidation('cardStocks',function(){
-                return $this->cardStocks->transform(function($cardStock){
+            'card_stocks' => $this->relationValidation('cardStocks', function () {
+                return $this->cardStocks->transform(function ($cardStock) {
                     return $cardStock->toShowApi();
                 });
             })
         ];
         $arr = $this->mergeArray(parent::toArray($request), $arr);
-        
+
         return $arr;
     }
 }

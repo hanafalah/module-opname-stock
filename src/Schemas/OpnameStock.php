@@ -1,25 +1,28 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Schemas;
+namespace Hanafalah\ModuleOpnameStock\Schemas;
 
-use Gii\ModuleItem\Contracts\CardStock;
-use Gii\ModuleItem\Contracts\Item;
-use Gii\ModuleItem\Contracts\ItemStock;
-use Zahzah\LaravelSupport\Supports\PackageManagement;
+use Hanafalah\ModuleItem\Contracts\CardStock;
+use Hanafalah\ModuleItem\Contracts\Item;
+use Hanafalah\ModuleItem\Contracts\ItemStock;
+use Hanafalah\LaravelSupport\Supports\PackageManagement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-use Gii\ModuleOpnameStock\{Enums\OpnameStock\Activity,
+use Hanafalah\ModuleOpnameStock\{
+    Enums\OpnameStock\Activity,
     Enums\OpnameStock\ActivityStatus,
     Enums\OpnameStock\Status
 };
-use Gii\ModuleOpnameStock\Contracts\OpnameStock as ContractsOpnameStock;
-use Gii\ModuleOpnameStock\Resources\OpnameStock\{
-    ShowOpnameStock, ViewOpnameStock
+use Hanafalah\ModuleOpnameStock\Contracts\OpnameStock as ContractsOpnameStock;
+use Hanafalah\ModuleOpnameStock\Resources\OpnameStock\{
+    ShowOpnameStock,
+    ViewOpnameStock
 };
 
-class OpnameStock extends PackageManagement implements ContractsOpnameStock{
+class OpnameStock extends PackageManagement implements ContractsOpnameStock
+{
     protected array $__guard   = [];
     protected array $__add     = [];
     protected string $__entity = 'OpnameStock';
@@ -32,19 +35,24 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
 
     ];
 
-    public function getOpnameStock(): mixed{
+    public function getOpnameStock(): mixed
+    {
         return static::$opname_stock_model;
     }
 
-    protected function showUsingRelation(){
+    protected function showUsingRelation()
+    {
         return [
-            'transaction','warehouse','author',
-            'cardStocks' => function($query){
+            'transaction',
+            'warehouse',
+            'author',
+            'cardStocks' => function ($query) {
                 $query->with([
                     'item',
-                    'stockMovements' => function($query){
+                    'stockMovements' => function ($query) {
                         $query->with([
-                            'reference','itemStock.funding',
+                            'reference',
+                            'itemStock.funding',
                             'childs.batchMovements.batch',
                             'batchMovements.batch'
                         ]);
@@ -54,16 +62,19 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         ];
     }
 
-    private function getWarehouseModel(): mixed{
+    private function getWarehouseModel(): mixed
+    {
         return app(config('module-opname-stock.warehouse'));
     }
 
-    private function getWarehouseById(mixed $id): Model|null{
+    private function getWarehouseById(mixed $id): Model|null
+    {
         $model = $this->getWarehouseModel();
         return $model->find($id);
     }
 
-    public function prepareRemoveOpnameStock(? array $attributes = null): bool{
+    public function prepareRemoveOpnameStock(?array $attributes = null): bool
+    {
         $attributes ??= request()->all();
         if (!isset($attributes['id'])) throw new \Exception('OpnameStock id not found');
 
@@ -71,41 +82,43 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         return $opname_stock->delete();
     }
 
-    public function removeOpnameStock(): bool{
-        return $this->transaction(function(){
+    public function removeOpnameStock(): bool
+    {
+        return $this->transaction(function () {
             return $this->prepareRemoveOpnameStock();
         });
     }
 
-    public function preapreStoreOpnameStock(? array $attributes = null): Model{
+    public function preapreStoreOpnameStock(?array $attributes = null): Model
+    {
         $attributes ??= request()->all();
 
         $warehouse = $this->getWarehouseById($attributes['warehouse_id']);
-        if(!isset($warehouse)) Throw new \Exception("Warehouse not found");
+        if (!isset($warehouse)) throw new \Exception("Warehouse not found");
 
-        if (isset($attributes['author_id'])){
-            if (!isset($attributes['author_type'])){
+        if (isset($attributes['author_id'])) {
+            if (!isset($attributes['author_type'])) {
                 $attributes['author_type'] = $this->getWrehouseModel()->getMorphClass();
             }
         }
 
         $opname_stock = $this->OpnameStockModel()->updateOrCreate([
             'id' => $attributes['id'] ?? null
-        ],[
+        ], [
             'author_type'    => $attributes['author_type'] ?? null,
             'author_id'      => $attributes['author_id'] ?? null,
             'warehouse_type' => $warehouse->getMorphClass(),
             'warehouse_id'   => $warehouse->getKey(),
             'status'         => Status::DRAFT->value,
         ]);
-        $opname_stock->pushActivity(Activity::OPNAME_STOCK->value,ActivityStatus::OPNAME_STOCK_CREATED->value);
+        $opname_stock->pushActivity(Activity::OPNAME_STOCK->value, ActivityStatus::OPNAME_STOCK_CREATED->value);
         $opname_stock->record_all_item = $attributes['record_all_item'];
         $opname_stock->save();
-        
-        if (isset($attributes['card_stocks']) && count($attributes['card_stocks']) > 0){
+
+        if (isset($attributes['card_stocks']) && count($attributes['card_stocks']) > 0) {
             $card_stocks = $attributes['card_stocks'];
             $transaction = $opname_stock->transaction;
-            foreach ($card_stocks as $card_stock){
+            foreach ($card_stocks as $card_stock) {
                 $card_stock['transaction_id'] = $transaction->getKey();
                 $card_stock['direction']      = $this->StockMovementModel()::OPNAME;
                 $card_stock['warehouse_id']   = $attributes['warehouse_id'];
@@ -116,13 +129,14 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         return static::$opname_stock_model = $opname_stock;
     }
 
-    public function prepareStoreOpnameItems(mixed $attributes = null): Model{
+    public function prepareStoreOpnameItems(mixed $attributes = null): Model
+    {
         $attributes ??= request()->all();
 
-        if (!isset($attributes['transaction_id'])){
-            if (!isset(static::$opname_stock_model)){
+        if (!isset($attributes['transaction_id'])) {
+            if (!isset(static::$opname_stock_model)) {
                 $opanem_stock = static::$opname_stock_model;
-            }else{
+            } else {
                 $id = $attributes['opanem_stock_id'] ?? null;
                 if (!isset($id)) throw new \Exception('No opname stock id provided', 422);
                 $opname_stock = $this->OpnameStockModel()->find($id);
@@ -130,56 +144,62 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
             $attributes['transaction_id'] = $opname_stock->transaction->getKey();
         }
         $opname_item = $this->schemaContract('card_stock')
-                                ->prepareStoreCardStock($attributes);
-        return static::$opname_item_model = $opname_item; 
+            ->prepareStoreCardStock($attributes);
+        return static::$opname_item_model = $opname_item;
     }
 
-    public function storeOpnameStock(): array{
-        return $this->transaction(function(){
+    public function storeOpnameStock(): array
+    {
+        return $this->transaction(function () {
             return $this->showOpnameStock($this->preapreStoreOpnameStock());
         });
     }
 
-    public function prepareShowOpnameStock(? Model $model = null): Model{
+    public function prepareShowOpnameStock(?Model $model = null): Model
+    {
         $attributes ??= request()->all();
 
         $model ??= $this->getOpnameStock();
-        if (!isset($model)){
+        if (!isset($model)) {
             $id = $attributes['id'] ?? null;
             if (!isset($id)) throw new \Exception('OpnameStock id not found');
 
             $model = $this->opnameStock()->with($this->showUsingRelation())->findOrFail($id);
-        }else{
+        } else {
             $model->load($this->showUsingRelation());
         }
         return static::$opname_stock_model = $model;
     }
 
-    public function showOpnameStock(? Model $model = null): array{
-        return $this->transforming($this->__resources['show'],function() use ($model){
+    public function showOpnameStock(?Model $model = null): array
+    {
+        return $this->transforming($this->__resources['show'], function () use ($model) {
             return $this->prepareShowOpnameStock($model);
         });
     }
 
-    public function prepareViewOpnameStockPaginate(int $perPage = 50, array $columns = ['*'], string $pageName = 'page',? int $page = null, ? int $total = null): LengthAwarePaginator{
+    public function prepareViewOpnameStockPaginate(int $perPage = 50, array $columns = ['*'], string $pageName = 'page', ?int $page = null, ?int $total = null): LengthAwarePaginator
+    {
         $attributes ??= request()->all();
         return $this->opnameStock()
-                    ->when(isset($attributes['warehouse_id']),function($query) use ($attributes){
-                        $query->whereHas("warehouse", function ($query) use ($attributes){
-                            $query->where("id", $attributes['warehouse_id']);
-                        });
-                    })->paginate($perPage);
+            ->when(isset($attributes['warehouse_id']), function ($query) use ($attributes) {
+                $query->whereHas("warehouse", function ($query) use ($attributes) {
+                    $query->where("id", $attributes['warehouse_id']);
+                });
+            })->paginate($perPage);
     }
 
 
-    public function viewOpnameStockPaginate(int $perPage = 50, array $columns = ['*'], string $pageName = 'page',? int $page = null, ? int $total = null): array{
+    public function viewOpnameStockPaginate(int $perPage = 50, array $columns = ['*'], string $pageName = 'page', ?int $page = null, ?int $total = null): array
+    {
         $paginate_options = compact('perPage', 'columns', 'pageName', 'page', 'total');
-        return $this->transforming($this->__resources['view'],function() use ($paginate_options){
+        return $this->transforming($this->__resources['view'], function () use ($paginate_options) {
             return $this->prepareViewOpnameStockPaginate(...$this->arrayValues($paginate_options));
         });
     }
 
-    public function prepareMainReportOpname(Model $opname): Model{
+    public function prepareMainReportOpname(Model $opname): Model
+    {
         if (isset($opname->reported_at)) throw new \Exception('Opname already reported', 422);
         $opname->reported_at = now();
         $opname->status = Status::REPORTED->value;
@@ -188,7 +208,7 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         $card_stocks = $opname->cardStocks;
 
         //UPDATING STOCK
-        if (isset($card_stocks) && count($card_stocks) > 0){
+        if (isset($card_stocks) && count($card_stocks) > 0) {
             foreach ($card_stocks as $card_stock) {
                 $card_stock->reported_at = now();
                 $card_stock->save();
@@ -198,20 +218,23 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         return $opname;
     }
 
-    public function prepareReportOpname(? array $attributes = null): Model{
+    public function prepareReportOpname(?array $attributes = null): Model
+    {
         $attributes ??= request()->all();
         if (!isset($attributes['id'])) throw new \Exception('No id provided', 422);
         $opname = $this->OpnameStockModel()->findOrFail($attributes['id']);
         return static::$opname_stock_model = $this->prepareMainReportOpname($opname);
     }
 
-    public function reportOpnameStock(): array{
-        return $this->transaction(function(){
+    public function reportOpnameStock(): array
+    {
+        return $this->transaction(function () {
             return $this->showOpnameStock($this->prepareReportOpname());
         });
     }
 
-    public function prepareDeleteOpname(? array $attributes = null): bool{
+    public function prepareDeleteOpname(?array $attributes = null): bool
+    {
         $attributes ??= request()->all();
         if (!isset($attributes['id'])) throw new \Exception('No id provided', 422);
 
@@ -219,14 +242,16 @@ class OpnameStock extends PackageManagement implements ContractsOpnameStock{
         return $model->delete();
     }
 
-    public function deleteOpnameStock(): bool{
-        return $this->transaction(function(){
+    public function deleteOpnameStock(): bool
+    {
+        return $this->transaction(function () {
             return $this->prepareDeleteOpname();
         });
     }
 
-    public function opnameStock(mixed $conditionals = null): Builder{
+    public function opnameStock(mixed $conditionals = null): Builder
+    {
         $this->booting();
-        return $this->OpnameStockModel()->with(['transaction','author','warehouse'])->conditionals($conditionals)->orderBy('created_at','desc');
+        return $this->OpnameStockModel()->with(['transaction', 'author', 'warehouse'])->conditionals($conditionals)->orderBy('created_at', 'desc');
     }
 }

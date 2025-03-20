@@ -1,8 +1,9 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Enums\OpnameStock;
+namespace Hanafalah\ModuleOpnameStock\Enums\OpnameStock;
 
-enum Status: string{
+enum Status: string
+{
     case DRAFT      = 'DRAFT';
     case REPORTED   = 'REPORTED';
     case CANCELLED  = 'CANCELLED';

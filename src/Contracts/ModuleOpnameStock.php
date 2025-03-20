@@ -1,9 +1,7 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Contracts;
+namespace Hanafalah\ModuleOpnameStock\Contracts;
 
-use Zahzah\LaravelSupport\Contracts\DataManagement;
+use Hanafalah\LaravelSupport\Contracts\DataManagement;
 
-interface ModuleOpnameStock extends DataManagement{
-
-}
+interface ModuleOpnameStock extends DataManagement {}

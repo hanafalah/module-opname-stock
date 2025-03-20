@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Gii\ModuleOpnameStock;
-use Zahzah\LaravelSupport\Providers\BaseServiceProvider;
+namespace Hanafalah\ModuleOpnameStock;
+
+use Hanafalah\LaravelSupport\Providers\BaseServiceProvider;
 
 class ModuleOpnameStockServiceProvider extends BaseServiceProvider
 {
@@ -15,9 +16,10 @@ class ModuleOpnameStockServiceProvider extends BaseServiceProvider
     public function register()
     {
         $this->registerMainClass(ModuleOpnameStock::class)
-             ->registerCommandService(Providers\CommandServiceProvider::class)
-             ->registers([
-                '*','Services' => function(){
+            ->registerCommandService(Providers\CommandServiceProvider::class)
+            ->registers([
+                '*',
+                'Services' => function () {
                     $this->binds([
                         Contracts\ModuleOpnameStock::class => ModuleOpnameStock::class,
                         Contracts\OpnameStock::class => Schemas\OpnameStock::class
@@ -31,11 +33,13 @@ class ModuleOpnameStockServiceProvider extends BaseServiceProvider
      *
      * @return string
      */
-    protected function dir(): string{
-        return __DIR__.'/';
+    protected function dir(): string
+    {
+        return __DIR__ . '/';
     }
 
-    protected function migrationPath(string $path = ''): string{
+    protected function migrationPath(string $path = ''): string
+    {
         return database_path($path);
     }
 }

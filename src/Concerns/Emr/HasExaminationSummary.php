@@ -1,11 +1,11 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Concerns\Emr;
+namespace Hanafalah\ModuleOpnameStock\Concerns\Emr;
 
 trait HasExaminationSummary
 {
     public function examinationSummary()
     {
-        return $this->morphOneModel('ExaminationSummary','reference');
+        return $this->morphOneModel('ExaminationSummary', 'reference');
     }
 }

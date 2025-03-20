@@ -1,8 +1,8 @@
 <?php
 
-namespace Gii\ModuleOpnameStock\Resources\OpnameStock;
+namespace Hanafalah\ModuleOpnameStock\Resources\OpnameStock;
 
-use Zahzah\LaravelSupport\Resources\ApiResource;
+use Hanafalah\LaravelSupport\Resources\ApiResource;
 
 class ViewOpnameStock extends ApiResource
 {
@@ -15,10 +15,10 @@ class ViewOpnameStock extends ApiResource
     {
         $arr = [
             'id' => $this->id,
-            'author' => $this->relationValidation('author',function(){
+            'author' => $this->relationValidation('author', function () {
                 return $this->author->toViewApi();
             }),
-            'warehouse' => $this->relationValidation('warehouse',function(){
+            'warehouse' => $this->relationValidation('warehouse', function () {
                 return $this->warehouse->toViewApi();
             }),
             'opname_code' => $this->procurement_code,
@@ -29,7 +29,7 @@ class ViewOpnameStock extends ApiResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-        
+
 
         return $arr;
     }

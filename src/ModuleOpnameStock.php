@@ -1,10 +1,8 @@
 <?php
 
-namespace Gii\ModuleOpnameStock;
+namespace Hanafalah\ModuleOpnameStock;
 
-use Zahzah\LaravelSupport\Supports\PackageManagement;
-use Gii\ModuleOpnameStock\Contracts\ModuleOpnameStock as ContractsModuleOpnameStock;
+use Hanafalah\LaravelSupport\Supports\PackageManagement;
+use Hanafalah\ModuleOpnameStock\Contracts\ModuleOpnameStock as ContractsModuleOpnameStock;
 
-class ModuleOpnameStock extends PackageManagement implements ContractsModuleOpnameStock{
-
-}
+class ModuleOpnameStock extends PackageManagement implements ContractsModuleOpnameStock {}
