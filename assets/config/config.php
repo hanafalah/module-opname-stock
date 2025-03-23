@@ -11,6 +11,10 @@ return [
     'commands' => [
         ModuleOpnameCommand\InstallMakeCommand::class
     ],
+    'libs' => [
+        'model' => 'Models',
+        'contract' => 'Contracts'
+    ],
     'database' => [
         'models' => [
             'OpnameStock' => ModuleOpname\OpnameStock::class,
