@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Hanafalah\LaravelHasProps\Concerns\HasProps;
 use Hanafalah\LaravelSupport\Concerns\Support\HasActivity;
 use Hanafalah\LaravelSupport\Models\BaseModel;
+use Hanafalah\ModuleOpnameStock\Resources\OpnameStock\{ViewOpnameStock,ShowOpnameStock};
 use Hanafalah\ModuleTransaction\Concerns\HasTransaction;
 
 class OpnameStock extends BaseModel
@@ -28,8 +29,7 @@ class OpnameStock extends BaseModel
     'reported_at'
   ];
 
-  protected static function booted(): void
-  {
+  protected static function booted(): void{
     parent::booted();
     static::creating(function ($query) {
       if (!isset($query->opname_code)) {
@@ -38,39 +38,32 @@ class OpnameStock extends BaseModel
     });
   }
 
-  public function author()
-  {
-    return $this->morphTo();
-  }
-  public function warehouse()
-  {
-    return $this->morphTo();
-  }
-  public function cardStock()
-  {
-    return $this->hasOneThroughModel(
-      'CardStock',
-      'Transaction',
-      'reference_id',
-      $this->TransactionModel()->getForeignKey(),
-      $this->getKeyName(),
-      $this->TransactionModel()->getKeyName()
-    )->where('reference_type', $this->getMorphClass());
+  public function showUsingRelation(){
+      return [
+          'cardStocks' => function ($query) {
+              $query->with([
+                  'stockMovements' => function ($query) {
+                      $query->with([
+                          'reference',
+                          'itemStock',
+                          'childs.batchMovements',
+                          'batchMovements'
+                      ]);
+                  }
+              ]);
+          }
+      ];
   }
 
-  public function cardStocks()
-  {
-    return $this->hasManyThroughModel(
-      'CardStock',
-      'Transaction',
-      'reference_id',
-      $this->TransactionModel()->getForeignKey(),
-      $this->getKeyName(),
-      $this->TransactionModel()->getKeyName()
-    )->where('reference_type', $this->getMorphClass());
-  }
+  public function getViewResource(){return ViewOpnameStock::class;}
+  public function getShowResource(){return ShowOpnameStock::class;}
 
-  public static array $activityList = [
+  public function author(){return $this->morphTo();}
+  public function warehouse(){return $this->morphTo();}
+  public function cardStock(){return $this->morphOneModel('CardStock','reference');}
+  public function cardStocks(){return $this->morphManyModel('CardStock','reference');}
+
+  public array $activityList = [
     Activity::OPNAME_STOCK->value . '_' . ActivityStatus::OPNAME_STOCK_CREATED->value    => ['flag' => 'OPNAME_STOCK_CREATED', 'message' => 'Opname stock created'],
     Activity::OPNAME_STOCK->value . '_' . ActivityStatus::OPNAME_STOCK_REPORTED->value   => ['flag' => 'OPNAME_STOCK_REPORTED', 'message' => 'Opname stock reported'],
     Activity::OPNAME_STOCK->value . '_' . ActivityStatus::OPNAME_STOCK_CANCELLED->value  => ['flag' => 'OPNAME_STOCK_CANCELLED', 'message' => 'Opname stock cancelled'],

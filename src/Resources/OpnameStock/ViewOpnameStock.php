@@ -16,15 +16,15 @@ class ViewOpnameStock extends ApiResource
         $arr = [
             'id' => $this->id,
             'author' => $this->relationValidation('author', function () {
-                return $this->author->toViewApi();
+                return $this->author->toViewApi()->resolve();
             }),
             'warehouse' => $this->relationValidation('warehouse', function () {
-                return $this->warehouse->toViewApi();
+                return $this->warehouse->toViewApi()->resolve();
             }),
             'opname_code' => $this->procurement_code,
             'transaction' => $this->relationValidation('transaction', function () {
-                return $this->transaction->toViewApi();
-            }),
+                return $this->transaction->toViewApi()->resolve();
+            },$this->prop_transaction),
             'reported_at' => $this->reported_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
